@@ -20,6 +20,9 @@ net_name =  'eth0'
 s1_name = 'sd'
 s1_path = '/'
 
+s2_name = None
+s2_path = None
+
 # Load config file
 config_file = os.environ.get('SYS_OLED_CONFIG', '/etc/sys-oled.conf')
 if os.path.isfile(config_file):
@@ -31,9 +34,8 @@ if os.path.isfile(config_file):
     net_name = config.get('device', 'network_name')
     s1_name = config.get('device', 'storage1_name')
     s1_path = config.get('device', 'storage1_path')
-    if config.has_option('device', 'storage2_name'):
-        s2_name = config.get('device', 'storage2_name')
-        s2_path = config.get('device', 'storage2_path')
+    s2_name = config.get('device', 'storage2_name', fallback=None)
+    s2_path = config.get('device', 'storage2_path', fallback=None)
 
 
 # Load font

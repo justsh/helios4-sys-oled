@@ -9,6 +9,7 @@
 # ]
 # ///
 
+import argparse
 import signal
 import os
 import sys
@@ -21,6 +22,11 @@ from luma.core.render import canvas
 from PIL import Image, ImageDraw, ImageFont
 
 from socket import AF_INET
+
+
+# CalVer: YYYY.MM.MICRO
+__version__ = '2026.04.1'
+
 
 # Load presets
 contrast = 255
@@ -65,7 +71,22 @@ font = ImageFont.truetype(font_path, 12)
 def get_device(actual_args=None):
     if actual_args is None:
         actual_args = sys.argv[1:]
-    parser = cmdline.create_parser(description='luma.core arguments')
+
+    base_parser = argparse.ArgumentParser(
+        description='luma.core arguments',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    base_parser.add_argument(
+        "--version",
+        action='version',
+        version="%(prog)s version " + __version__,
+    )
+
+    parser = cmdline.create_parser(
+        # description is only used to initialize a default parser if one is not passed.
+        description=None,
+        parser=base_parser,
+    )
     args = parser.parse_args(actual_args)
 
     if args.config:

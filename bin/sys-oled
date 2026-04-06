@@ -11,17 +11,19 @@ from luma.core import cmdline, error
 from luma.core.render import canvas
 from PIL import Image, ImageDraw, ImageFont
 
-
 # Load presets
 contrast = 255
 refresh = 10
-show_logo = 'yes'
+show_logo = True
 net_name =  'eth0'
 s1_name = 'sd'
 s1_path = '/'
 
 s2_name = None
 s2_path = None
+
+dim_begin_hour = -1
+dim_until_hour = -1
 
 # Load config file
 config_file = os.environ.get('SYS_OLED_CONFIG', '/etc/sys-oled.conf')
@@ -30,12 +32,17 @@ if os.path.isfile(config_file):
     config.read(config_file)
     contrast = int(config.get('main', 'contrast'))
     refresh = float(config.get('main', 'refresh'))
-    show_logo = config.get('main', 'show_logo')
+    show_logo = config.getboolean('main', 'show_logo')
     net_name = config.get('device', 'network_name')
     s1_name = config.get('device', 'storage1_name')
     s1_path = config.get('device', 'storage1_path')
     s2_name = config.get('device', 'storage2_name', fallback=None)
     s2_path = config.get('device', 'storage2_path', fallback=None)
+
+    # Night Mode extension
+    dim_contrast = config.getint('night_mode', 'contrast', fallback=0)
+    dim_begin_hour = config.getint('night_mode', 'dim_begin_hour', fallback=-1)
+    dim_until_hour = config.getint('night_mode', 'dim_until_hour', fallback=-1)
 
 
 # Load font
@@ -175,10 +182,23 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 
 def main():
+    maybe_show_logo = show_logo
+
     while True:
+        now = datetime.now().astimezone()
+        if (
+            (dim_begin_hour > -1 and now.hour >= dim_begin_hour)
+            or (dim_until_hour > -1 and now.hour <= dim_until_hour)
+        ):
+            device.contrast(dim_contrast)
+            maybe_show_logo = True
+        else:
+            device.contrast(contrast)
+            maybe_show_logo = show_logo
+
         display_info(device)
         time.sleep(refresh)
-        if show_logo == "yes":
+        if maybe_show_logo:
             logo(device, host_time())
             time.sleep(refresh / 2)
 

@@ -11,6 +11,8 @@ from luma.core import cmdline, error
 from luma.core.render import canvas
 from PIL import Image, ImageDraw, ImageFont
 
+from socket import AF_INET
+
 # Load presets
 contrast = 255
 refresh = 10
@@ -104,9 +106,20 @@ def disk_usage(name, dir):
         % (bytes2human(usage.used), bytes2human(usage.total), usage.percent)
 
 def network(iface):
-    addr = psutil.net_if_addrs()[iface]
+    ipv4_ifaces = {
+        name: nicaddr
+        for name, addrs in psutil.net_if_addrs().items()
+        for nicaddr in addrs
+        if nicaddr.family == AF_INET
+    }
+
+    try:
+        nic = ipv4_ifaces[iface]
+    except KeyError:
+        return "%s: no ipv4 connection" % (iface)
+
     return "%s: %s" \
-        % (iface, addr[0].address)
+        % (iface, nic.address)
 
 def host_time():
     now = datetime.now()

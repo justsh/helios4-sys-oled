@@ -102,17 +102,62 @@ def host_time():
     hostname = os.uname()[1]
     return hostname + " " + now.strftime("%Y-%m-%d %H:%M")
 
+class CanvasCursor:
+    def __init__(self, draw, x=0, y=0, width=128, line_height=11, line_spacing=1):
+        self.x = x
+        self.y = y
+
+        # font-specific
+        self.line_height = line_height
+        self.line_spacing = line_spacing
+        self.width = width
+
+        self.draw = draw
+
+    @property
+    def coords(self):
+        return (self.x, self.y)
+
+    def text(self, *args, **kwargs):
+        """Calls ImageDraw.text() with a pre-calculated xy argument"""
+        x, y = self.coords
+
+        self.draw.text((x, y), *args, **kwargs)
+
+        # add a carriage return (x=0) and line feed (y+=line_height)
+        self.x = 0
+        self.y = y + self.line_height + self.line_spacing
+
+    def line(self, *args, **kwargs):
+        """Calls ImageDraw.line() with a pre-calculated xy argument"""
+        x, y = self.coords
+
+        y += self.line_spacing
+        self.draw.line((x, y) + (self.width, y), *args, **kwargs)
+        y += self.line_spacing
+
+        # add a carriage return (x=0) and line feed (y+=line_height)
+        self.x = 0
+        self.y = y + self.line_spacing
+
 def display_info(device):
     with canvas(device) as draw:
-    	draw.text((0, 0), cpu_usage(), font=font, fill="white")
-    	draw.line((0,13)+(128,13), fill="white")
-    	draw.text((0, 15), mem_usage(), font=font, fill="white")
-    	draw.text((0, 27), disk_usage(s1_name, s1_path), font=font, fill="white")
-    	if 's2_name' in globals():
-        	draw.text((0, 39), disk_usage(s2_name, s2_path), font=font, fill="white")
-        	draw.text((0, 51), network(net_name), font=font, fill="white")
-    	else:
-        	draw.text((0, 39), network(net_name), font=font, fill="white")
+        cursor = CanvasCursor(draw)
+
+        cursor.text(cpu_usage(), font=font, fill="white")
+        cursor.line(fill="white")
+        cursor.text(mem_usage(), font=font, fill="white")
+        cursor.text(disk_usage(s1_name, s1_path), font=font, fill="white")
+        if s2_name is not None and s2_path is not None:
+            # always assume storage2 is a RAID mountpoint
+            cursor.text(
+                disk_usage(s2_name, s2_path)
+                if os.path.ismount(s2_path)
+                else s2_name + ": not mounted",
+                font=font,
+                fill="white",
+            )
+        cursor.text(network(net_name), font=font, fill="white")
 
 def logo(device, msg):
     img_path = os.path.abspath(os.path.join(os.path.dirname(__file__),

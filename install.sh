@@ -5,6 +5,10 @@ INSTALL_PATH="/usr/local/"
 SYSTEMD_PATH="/etc/systemd/"
 DEPS="python3-dev python3-pip python3-setuptools python3-wheel python3-psutil libfreetype6-dev libjpeg-dev build-essential"
 
+if [ "$1" = "dev" ]; then
+  ENV="dev"
+fi
+
 if [ "$(id -u)" != "0" ]; then
     echo "This script must be run as root!"
     exit 1
@@ -16,6 +20,11 @@ apt-get install -y $DEPS
 
 echo "Installing luma.oled library"
 pip3 install --upgrade luma.oled
+
+if [ "${ENV:-""}" = "dev" ]; then
+  echo "Installing luma.emulator library"
+  pip3 install --upgrade luma.emulator
+fi
 
 echo "Installing sys-oled files"
 cp -fv etc/sys-oled.conf  /etc

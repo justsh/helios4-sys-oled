@@ -4,6 +4,7 @@
 # requires-python = ">=3.9"
 # dependencies = [
 #   "luma.oled",
+#   "luma.emulator",
 #   "psutil",
 # ]
 # ///
@@ -232,6 +233,8 @@ def main():
             time.sleep(refresh / 2)
 
 if __name__ == "__main__":
+    os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+
     try:
         device = get_device()
         device.contrast(contrast)

@@ -88,3 +88,17 @@ systemctl restart sys-oled.service
 ## Note
 
 This sys-oled app was developed and tested only with the OLED model SH1106 which has a matrix panel of 132 x 64. If you use a different model that has a smaller resolution, you might need to tweak the coordinate values.
+
+## HACKING
+
+The luma.oled library supports emulating the rendered display by installing the additional display targets in the luma.emulators package.
+Specifically, using the `pygame` emulator is helpful for iterating on systems that do not have an OLED display available.
+
+```
+cd sys-oled
+sudo ./install.sh dev
+sudo sys-oled --display pygame
+```
+
+Note that luma.emulators must have access to system libraries in order to start the pygame display because the display depends on support for loading PNGs.
+If instead luma.emulators is installed into, for example, a virtual environment without access to system site packages, then you may see the error message "File is not a Windows BMP file" (because out of the box, pygame only supports BMP image data).

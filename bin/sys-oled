@@ -64,8 +64,12 @@ def get_device(actual_args=None):
     try:
         device = cmdline.create_device(args)
     except error.Error as e:
-        parser.error(e)
+        device = None
+        parser.error(str(e))
 
+    assert device is not None, (
+        "luma.core.cmdline.create_device returned None for args: %r" % args
+    )
     return device
 
 def bytes2human(n):
@@ -175,7 +179,7 @@ def logo(device, msg):
         draw.bitmap((0, 0), logo, fill="white")
         draw.text((0,52), msg, font=font, fill="white")
 
-def sigterm_handler():
+def sigterm_handler(_signum, _frame):
     sys.exit(0)
 
 signal.signal(signal.SIGTERM, sigterm_handler)

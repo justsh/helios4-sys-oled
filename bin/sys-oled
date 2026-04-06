@@ -21,7 +21,7 @@ s1_name = 'sd'
 s1_path = '/'
 
 # Load config file
-config_file = '/etc/sys-oled.conf'
+config_file = os.environ.get('SYS_OLED_CONFIG', '/etc/sys-oled.conf')
 if os.path.isfile(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)

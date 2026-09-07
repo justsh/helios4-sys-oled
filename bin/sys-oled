@@ -35,6 +35,8 @@ if __name__ == "__main__":
       level=logging.INFO,
     )
 
+DEFAULT_CONFIG_FILE = "/etc/sys-oled.conf"
+
 # Load presets
 contrast = 255
 refresh = 10
@@ -52,7 +54,10 @@ dim_until_hour = -1
 logger.info("Reading configuration file")
 
 # Load config file
-config_file = os.environ.get('SYS_OLED_CONFIG', '/etc/sys-oled.conf')
+if not (config_file := os.environ.get('SYS_OLED_CONFIG', None)):
+    config_file = DEFAULT_CONFIG_FILE
+    logger.info("Using default configuration file: %s", config_file)
+
 if os.path.isfile(config_file):
     logger.info("Loading config file: %s", config_file)
     config = configparser.ConfigParser()

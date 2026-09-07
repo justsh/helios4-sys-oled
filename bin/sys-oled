@@ -38,6 +38,8 @@ if __name__ == "__main__":
 DEFAULT_CONFIG_FILE = "/etc/sys-oled.conf"
 
 # Load presets
+display_model = "sh1106"
+
 contrast = 255
 refresh = 10
 show_logo = True
@@ -62,6 +64,9 @@ if os.path.isfile(config_file):
     logger.info("Loading config file: %s", config_file)
     config = configparser.ConfigParser()
     config.read(config_file)
+
+    display_model = config.get('main', 'display_model')
+
     contrast = int(config.get('main', 'contrast'))
     refresh = float(config.get('main', 'refresh'))
     show_logo = config.getboolean('main', 'show_logo')
@@ -88,6 +93,12 @@ font = ImageFont.truetype(font_path, 12)
 def get_device(actual_args=None):
     if actual_args is None:
         actual_args = sys.argv[1:]
+
+    if any(arg in {"-d", "--display"} for arg in actual_args):
+        logger.info("Reading display override from command line")
+    else:
+        logger.info("Using display model from configuration: %s", display_model)
+        actual_args = list(actual_args) + ["--display", display_model]
 
     base_parser = argparse.ArgumentParser(
         description='luma.core arguments',

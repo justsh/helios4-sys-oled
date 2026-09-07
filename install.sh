@@ -19,11 +19,11 @@ apt-get update
 apt-get install -y $DEPS
 
 echo "Installing luma.oled library"
-pip3 install --upgrade luma.oled
+pip3 install --break-system-packages --upgrade luma.oled
 
 if [ "${ENV:-""}" = "dev" ]; then
   echo "Installing luma.emulator library"
-  pip3 install --upgrade luma.emulator
+  pip3 install --break-system-packages --upgrade luma.emulator
 fi
 
 echo "Installing sys-oled files"

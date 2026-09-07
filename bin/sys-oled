@@ -26,7 +26,7 @@ from socket import AF_INET
 
 
 # CalVer: YYYY.MM.MICRO
-__version__ = '2026.04.1'
+__version__ = '2026.09.1'
 
 logger = logging.getLogger("sys-oled" if __name__ == "__main__" else __name__)
 if __name__ == "__main__":
